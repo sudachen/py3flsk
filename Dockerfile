@@ -1,4 +1,5 @@
 FROM alpine:3.7
+MAINTAINER Alexey Sudachen <alexey@sudachen.name>
 
 ENV PATH /usr/local/bin:$PATH
 ENV LANG C.UTF-8
@@ -7,16 +8,14 @@ ENV PYTHON_PIP_VERSION 10.0.0
 RUN apk add --no-cache ca-certificates 
 
 RUN set -ex \
-	&& apk --no-cache add python3 wget bash nginx \ 
+	&& apk --no-cache add python3 wget bash nginx zeromq \ 
 	&& apk --no-cache add --virtual .x-deps \ 
 		gcc \
 		g++ \
 		gfortran \
 		python3-dev \
+		zeromq-dev \
 		build-base \
-		freetype-dev \
-		libpng-dev \
-		openblas-dev \
 		linux-headers \
 	\
 	&& ln -s /usr/include/locale.h /usr/include/xlocale.h \
@@ -30,7 +29,7 @@ RUN set -ex \
         && pip3 install --no-cache-dir -v 'numpy==1.12.1' \
  	&& pip3 install --no-cache-dir -v Cython --install-option="--no-cython-compile" \
 	&& pip3 install --no-cache-dir -v 'tornado>=3.0,<5.0' \
-	&& pip3 install --no-cache-dir -v 'pyzmq>=13.1.0,<17.0' \
+	&& pip3 install --no-cache-dir -v 'pyzmq>=13.1.0,<17.0' --install-option="--zmq=bandled" \
         && pip3 install --no-cache-dir -v gunicorn \
         && pip3 install --no-cache-dir -v circus \
         && pip3 install --no-cache-dir -v 'flask>=0.12.2' \
@@ -47,8 +46,8 @@ RUN set -ex \
 	apk del .x-deps 
 
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY circus.conf /etc/circus.ini
+COPY circus.ini /etc/circus.ini
 COPY app /app
 EXPOSE 80 5000
-CMD ["circus", "/etc/circus.ini"]
+CMD ["circusd", "/etc/circus.ini"]
 
