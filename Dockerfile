@@ -8,7 +8,7 @@ ENV PYTHON_PIP_VERSION 10.0.0
 RUN apk add --no-cache ca-certificates 
 
 RUN set -ex \
-	&& apk --no-cache add python3 wget bash nginx zeromq \ 
+	&& apk --no-cache add python3 git subversion wget bash nginx zeromq \ 
 	&& apk --no-cache add --virtual .x-deps \ 
 		gcc \
 		g++ \
