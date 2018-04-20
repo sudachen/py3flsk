@@ -7,8 +7,17 @@ ENV PYTHON_PIP_VERSION 10.0.0
 
 RUN apk add --no-cache ca-certificates 
 
+COPY ssh/motd /etc/motd
+
+# ATTENTION generate new keys if open SSH port!
+COPY ssh/sshd_config /etc/ssh/sshd_config
+COPY ssh/host/id_rsa /etc/ssh/id_rsa
+COPY ssh/host/id_rsa.pub /etc/ssh/id_rsa.pub
+COPY ssh/root/id_rsa.pub /root/.ssh/authorized_keys
+
 RUN set -ex \
-	&& apk --no-cache add python3 git subversion wget bash nginx zeromq \ 
+	&& chmod 700 /etc/ssh /root/.ssh && chmod 600 /etc/ssh/* /root/.ssh/* \
+	&& apk --no-cache add python3 git subversion wget bash nginx zeromq openssh \ 
 	&& apk --no-cache add --virtual .x-deps \ 
 		gcc \
 		g++ \
@@ -48,6 +57,6 @@ RUN set -ex \
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY circus.ini /etc/circus.ini
 COPY app /app
-EXPOSE 80 5000
+EXPOSE 22 80 5000
 CMD ["circusd", "/etc/circus.ini"]
 
